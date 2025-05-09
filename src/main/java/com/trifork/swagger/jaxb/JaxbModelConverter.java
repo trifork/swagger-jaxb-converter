@@ -30,18 +30,11 @@ import jakarta.xml.bind.annotation.XmlValue;
 
 public class JaxbModelConverter implements ModelConverter {
 
-    // Constructor for programmatic use (e.g., testing, etc.)
-    // public JaxbModelConverter(ObjectMapper mapper) {
-    // super(mapper);
-    // }
-
     // No-arg constructor for ServiceLoader SPI (required)
     public JaxbModelConverter() {
-        // this(new ObjectMapper());
     }
 
-    public Schema resolve(AnnotatedType type, ModelConverterContext context, Iterator<ModelConverter> chain) {
-        // if (type.isSchemaProperty()) {
+    public Schema<?> resolve(AnnotatedType type, ModelConverterContext context, Iterator<ModelConverter> chain) {
         JavaType _type = Json.mapper().constructType(type.getType());
         if (_type != null) {
             Class<?> rawClass = _type.getRawClass();
@@ -73,14 +66,12 @@ public class JaxbModelConverter implements ModelConverter {
                         String name = field.getName();
                         Class<?> fieldType = field.getType();
 
-                        Schema fieldModel;
+                        Schema<?> fieldModel;
                         if (List.class.isAssignableFrom(fieldType)) {
                             // A multivalued field
                             Class<?> elementType = getElementType(field);
-                            // Schema fieldItemModel = context.resolve(new AnnotatedType(elementType));
-                            // fieldModel = new ArraySchema().items(new Schema().$ref(fieldItemModel.get$ref()));
 
-                            Schema fieldItemModel = context.resolve(new AnnotatedType(elementType));
+                            Schema<?> fieldItemModel = context.resolve(new AnnotatedType(elementType));
                             fieldModel = new ArraySchema().items(fieldItemModel);
 
                         } else {
@@ -132,8 +123,6 @@ public class JaxbModelConverter implements ModelConverter {
         } else {
             return null;
         }
-
-        // }
     }
 
     private List<String> getXmlEnumValues(Class<? extends Enum<?>> enumClass) {
@@ -198,108 +187,4 @@ public class JaxbModelConverter implements ModelConverter {
 
         return sorted;
     }
-
-    private List<Object> getJaxbEnumValues(Class<?> enumClass) {
-        List<Object> values = new ArrayList<>();
-        for (Field field : enumClass.getFields()) {
-            if (!field.isEnumConstant())
-                continue;
-
-            // Get the value from @XmlEnumValue if present
-            XmlEnumValue annotation = field.getAnnotation(XmlEnumValue.class);
-            values.add(annotation != null ? annotation.value() : field.getName());
-        }
-        return values;
-    }
-
-    // public Schema resolve(AnnotatedType type, ModelConverterContext context, Iterator<ModelConverter> chain) {
-    // Schema schema = super.resolve(type, context, chain);
-
-    // if (schema == null || type == null || type.getType() == null) {
-    // return schema;
-    // }
-
-    // Class<?> rawClass = getRawClass(type.getType());
-    // if (rawClass == null)
-    // return schema;
-
-    // // Handle JAXB @XmlEnum and @XmlEnumValue annotations for Enums
-    // if (rawClass.isEnum()) {
-    // schema.setEnum(getJaxbEnumValues(rawClass));
-    // }
-
-    // // Handle JAXB @XmlType annotations for property ordering and renaming
-    // XmlType xmlType = rawClass.getAnnotation(XmlType.class);
-    // if (xmlType != null) {
-    // // Add JAXB properties manually if they're missing from the schema
-    // if (schema.getProperties() == null) {
-    // schema.setProperties(new LinkedHashMap<>());
-    // }
-    // // Scan for JAXB annotations like @XmlElement, @XmlAttribute
-    // for (Field field : rawClass.getDeclaredFields()) {
-    // if (Modifier.isStatic(field.getModifiers()))
-    // continue; // Skip static fields
-
-    // String name = field.getName();
-    // XmlElement xmlElement = field.getAnnotation(XmlElement.class);
-    // if (xmlElement != null && !"##default".equals(xmlElement.name())) {
-    // schema.getProperties().put(xmlElement.name(), new StringSchema());
-    // } else {
-    // schema.getProperties().put(name, new StringSchema());
-    // }
-    // }
-
-    // // Reorder properties based on the `propOrder` from @XmlType
-    // if (xmlType != null && xmlType.propOrder().length > 0) {
-    // schema.setProperties(reorderProperties(schema.getProperties(), xmlType.propOrder()));
-    // }
-    // }
-
-    // return schema;
-    // }
-
-    // private LinkedHashMap<String, Schema> reorderProperties(Map<String, Schema> props, String[] order) {
-    // LinkedHashMap<String, Schema> sorted = new LinkedHashMap<>();
-    // Set<String> added = new HashSet<>();
-
-    // // First, add the properties in the order specified by propOrder
-    // for (String key : order) {
-    // if (props.containsKey(key)) {
-    // sorted.put(key, props.get(key));
-    // added.add(key);
-    // }
-    // }
-
-    // // Add any remaining properties that were not reordered
-    // for (Map.Entry<String, Schema> entry : props.entrySet()) {
-    // if (!added.contains(entry.getKey())) {
-    // sorted.put(entry.getKey(), entry.getValue());
-    // }
-    // }
-
-    // return sorted;
-    // }
-
-    // private List<Object> getJaxbEnumValues(Class<?> enumClass) {
-    // List<Object> values = new ArrayList<>();
-    // for (Field field : enumClass.getFields()) {
-    // if (!field.isEnumConstant())
-    // continue;
-
-    // // Get the value from @XmlEnumValue if present
-    // XmlEnumValue annotation = field.getAnnotation(XmlEnumValue.class);
-    // values.add(annotation != null ? annotation.value() : field.getName());
-    // }
-    // return values;
-    // }
-
-    // private Class<?> getRawClass(Type type) {
-    // if (type instanceof Class<?>) {
-    // return (Class<?>) type;
-    // }
-    // if (type instanceof JavaType) {
-    // return ((JavaType) type).getRawClass();
-    // }
-    // return null;
-    // }
 }
