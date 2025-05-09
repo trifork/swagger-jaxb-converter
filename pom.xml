@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.trifork.swagger-jaxb-converter</groupId>
     <artifactId>swagger-jaxb-converter</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <organization>
@@ -30,7 +30,7 @@
         <connection>scm:git:git@github.com:trifork/swagger-jaxb-converter.git</connection>
         <url>scm:git:git@github.com:trifork/swagger-jaxb-converter.git</url>
         <developerConnection>scm:git:git@github.com:trifork/swagger-jaxb-converter.git</developerConnection>
-        <tag>swagger-jaxb-converter-1.0.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <dependencies>
